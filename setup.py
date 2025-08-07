@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="github-project-mcp",
-    version="0.1.0",
+    version="0.1.1",
     author="Enrica Tan",
     author_email="tanenrica@gmail.com",
     description="A Model Context Protocol server for managing GitHub projects and issues via GraphQL",

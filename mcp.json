@@ -1,13 +1,8 @@
 {
   "mcpServers": {
     "github-project": {
-      "command": "python",
-      "args": [
-        "github_project_server.py"
-      ],
-      "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
-      }
+      "command": "full-path-to-gps-cli-see-readme",
+      "args": ["start", "--token", "your_github_token_here"]
     }
   }
 }

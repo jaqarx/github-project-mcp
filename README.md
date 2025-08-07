@@ -5,8 +5,13 @@ A Model Context Protocol (MCP) server for managing GitHub projects and issues us
 ## Features
 
 - List, create, update, and delete (close) GitHub issues
+- Create issues with embedded images (upload local files or use URLs)
+- Add/remove labels and assignees from issues
 - List GitHub projects (ProjectsV2)
-- Get project items
+- Add/remove issues from projects
+- Update project item fields (move between columns/status)
+- Get project items and fields
+- Get repository labels and user IDs
 - Full GraphQL API integration for efficient data fetching
 - Easy-to-use CLI with `gps` command
 
@@ -342,11 +347,27 @@ issues = await client.list_issues("octocat", "hello-world")
 - **create_issue**: Create a new issue
   - Parameters: `owner`, `repo`, `title`, `body`, `labels`, `assignees`
   
+- **create_issue_with_images**: Create an issue with embedded images
+  - Parameters: `owner`, `repo`, `title`, `body`, `images` (array), `labels`, `assignees`
+  - Images can be: local file paths, URLs, or objects with `path`/`url` and `alt` text
+  
 - **update_issue**: Update an existing issue
   - Parameters: `issue_id`, `title`, `body`, `state`, `labels`, `assignees`
   
 - **delete_issue**: Close an issue (GitHub doesn't support deletion)
   - Parameters: `issue_id`
+
+- **add_labels_to_issue**: Add labels to an issue
+  - Parameters: `issue_id`, `label_ids` (array)
+  
+- **remove_labels_from_issue**: Remove labels from an issue
+  - Parameters: `issue_id`, `label_ids` (array)
+  
+- **add_assignees_to_issue**: Add assignees to an issue
+  - Parameters: `issue_id`, `assignee_ids` (array)
+  
+- **remove_assignees_from_issue**: Remove assignees from an issue
+  - Parameters: `issue_id`, `assignee_ids` (array)
 
 ### Project Management
 
@@ -355,11 +376,32 @@ issues = await client.list_issues("octocat", "hello-world")
   
 - **get_project_items**: Get items in a project
   - Parameters: `project_id`
+  
+- **add_issue_to_project**: Add an issue to a project
+  - Parameters: `project_id`, `issue_id`
+  
+- **remove_issue_from_project**: Remove an issue from a project
+  - Parameters: `project_id`, `item_id`
+  
+- **update_project_item_field**: Update a project item's field (advanced)
+  - Parameters: `project_id`, `item_id`, `field_id`, `value` (option ID for single-select fields)
+  
+- **update_project_item_status**: Update a project item's status (Todo, In Progress, Done, etc.)
+  - Parameters: `project_id`, `item_id`, `status` (status name as text)
+  
+- **get_project_fields**: Get available fields in a project (including status options)
+  - Parameters: `project_id`
 
 ### Utilities
 
 - **get_repo_id**: Get repository ID for GraphQL mutations
   - Parameters: `owner`, `repo`
+  
+- **get_repository_labels**: Get all labels in a repository with their IDs
+  - Parameters: `owner`, `repo`
+  
+- **get_user_id**: Get a GitHub user's ID by username
+  - Parameters: `username`
 
 ## Example Usage
 
@@ -399,6 +441,79 @@ issues = await client.list_issues("octocat", "hello-world")
   }
 }
 ```
+
+### Add Labels to Issue
+```json
+{
+  "tool": "add_labels_to_issue",
+  "arguments": {
+    "issue_id": "I_kwDOBFQLEs5XB1234",
+    "label_ids": ["LA_kwDOBFQLEs7XB5678", "LA_kwDOBFQLEs7XB9012"]
+  }
+}
+```
+
+### Add Issue to Project
+```json
+{
+  "tool": "add_issue_to_project",
+  "arguments": {
+    "project_id": "PVT_kwDOBFQLEs4XB1234",
+    "issue_id": "I_kwDOBFQLEs5XB1234"
+  }
+}
+```
+
+### Update Issue Status in Project Board
+```json
+{
+  "tool": "update_project_item_status",
+  "arguments": {
+    "project_id": "PVT_kwDOBFQLEs4XB1234",
+    "item_id": "PVTI_lADOBFQLEs5XB1234",
+    "status": "In Progress"
+  }
+}
+```
+
+Common status values: "Todo", "In Progress", "Done" (varies by project configuration)
+
+### Advanced: Update Project Field Directly
+```json
+{
+  "tool": "update_project_item_field",
+  "arguments": {
+    "project_id": "PVT_kwDOBFQLEs4XB1234",
+    "item_id": "PVTI_lADOBFQLEs5XB1234",
+    "field_id": "PVTF_lADOBFQLEs5XB5678",
+    "value": "PVTSSF_lADOBFQLEs5XB9999"
+  }
+}
+```
+Note: For status fields, use `update_project_item_status` instead for easier usage
+
+### Create Issue with Images
+```json
+{
+  "tool": "create_issue_with_images",
+  "arguments": {
+    "owner": "octocat",
+    "repo": "hello-world",
+    "title": "Bug: Visual regression in dashboard",
+    "body": "The dashboard layout is broken on mobile devices",
+    "images": [
+      "/path/to/screenshot1.png",
+      "https://example.com/image.jpg",
+      {
+        "path": "/path/to/screenshot2.png",
+        "alt": "Mobile view screenshot"
+      }
+    ]
+  }
+}
+```
+
+Images are automatically uploaded to the repository and embedded in the issue body using Markdown
 
 ## GraphQL API Benefits
 

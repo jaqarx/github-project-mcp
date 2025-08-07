@@ -122,9 +122,6 @@ def start(token: Optional[str], port: int, verbose: bool, daemon: bool):
                     pid_file.write_text(str(pid))
         else:
             # Run in foreground
-            console.print("[green]🚀 Starting GitHub Project MCP Server...[/green]")
-            console.print("[cyan]Server is running and ready to accept connections[/cyan]")
-            console.print("[yellow]Press Ctrl+C to stop the server[/yellow]")
             subprocess.run([sys.executable, str(server_path)])
     
     except KeyboardInterrupt:
